@@ -398,21 +398,23 @@ static void write_def_file(pe& img, const filesystem::path& img_fn, const vector
             continue;
         }
 
-        auto& l = labels.at(img.base_addr + e.addr);
-
-        auto dmn = demangle_name(l[0]);
-
         if (!e.fwd.empty()) {
             if (e.name.empty())
                 f << fmt::format("    {} @{} NONAME\n", e.fwd, e.ordinal);
             else
                 f << fmt::format("    {} = {} @{}\n", e.name, e.fwd, e.ordinal);
-        } else if (e.name.empty())
-            f << fmt::format("    {} @{} NONAME\n", dmn, e.ordinal);
-        else if (dmn == e.name)
-            f << fmt::format("    {} @{}\n", dmn, e.ordinal);
-        else
-            f << fmt::format("    {} = {} @{}\n", e.name, dmn, e.ordinal);
+        } else {
+            auto& l = labels.at(img.base_addr + e.addr);
+
+            auto dmn = demangle_name(l[0]);
+
+            if (e.name.empty())
+                f << fmt::format("    {} @{} NONAME\n", dmn, e.ordinal);
+            else if (dmn == e.name)
+                f << fmt::format("    {} @{}\n", dmn, e.ordinal);
+            else
+                f << fmt::format("    {} = {} @{}\n", e.name, dmn, e.ordinal);
+        }
     }
 
     fmt::print("done\n");
